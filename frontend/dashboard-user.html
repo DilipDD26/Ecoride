@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - EcoRide</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-car-alt me-2"></i>EcoRide
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item me-3">
+                        <div class="position-relative">
+                            <button class="btn btn-outline-light position-relative" id="notificationBtn" onclick="toggleNotifications()">
+                                <i class="fas fa-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge">
+                                    0
+                                </span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end p-3 d-none" id="notificationPanel" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                                <h6 class="dropdown-header">Notifications</h6>
+                                <div id="notificationList">
+                                    <p class="text-muted text-center small">No new notifications</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <span class="navbar-text me-3">Welcome, <span id="userName">User</span></span>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button">
+                    <i class="fas fa-search me-2"></i>Search Rides
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="offer-tab" data-bs-toggle="tab" data-bs-target="#offer" type="button">
+                    <i class="fas fa-plus-circle me-2"></i>Offer Ride
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="my-rides-tab" data-bs-toggle="tab" data-bs-target="#my-rides" type="button">
+                    <i class="fas fa-car me-2"></i>My Rides
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bookings-tab" data-bs-toggle="tab" data-bs-target="#bookings" type="button">
+                    <i class="fas fa-ticket-alt me-2"></i>My Bookings
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button">
+                    <i class="fas fa-user-circle me-2"></i>My Profile
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="dashboardTabContent">
+            <!-- Search Rides Tab -->
+            <div class="tab-pane fade show active" id="search" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-search me-2"></i>Find Available Rides</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="searchForm" class="row g-3">
+                            <div class="col-md-3">
+                                <label for="searchFrom" class="form-label">From</label>
+                                <input type="text" class="form-control" id="searchFrom" placeholder="Starting location">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="searchTo" class="form-label">To</label>
+                                <input type="text" class="form-control" id="searchTo" placeholder="Destination">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="searchDate" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="searchDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="searchMinSeats" class="form-label">Min Seats</label>
+                                <select class="form-control" id="searchMinSeats">
+                                    <option value="">Any</option>
+                                    <option value="1">1+</option>
+                                    <option value="2">2+</option>
+                                    <option value="3">3+</option>
+                                    <option value="4">4+</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="searchMinPrice" class="form-label">Min Price ($)</label>
+                                <input type="number" class="form-control" id="searchMinPrice" placeholder="0" min="0" step="0.01">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="searchMaxPrice" class="form-label">Max Price ($)</label>
+                                <input type="number" class="form-control" id="searchMaxPrice" placeholder="Any" min="0" step="0.01">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-search me-2"></i>Search Rides
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary ms-2" onclick="clearSearchFilters()">
+                                    <i class="fas fa-times me-2"></i>Clear Filters
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Search Results -->
+                <div id="searchResults" class="mt-4"></div>
+            </div>
+
+            <!-- Offer Ride Tab -->
+            <div class="tab-pane fade" id="offer" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-plus-circle me-2"></i>Offer a New Ride</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="offerAlert" class="alert alert-success d-none"></div>
+                        <form id="offerForm" class="row g-3">
+                            <div class="col-md-6">
+                                <label for="offerFrom" class="form-label">From *</label>
+                                <input type="text" class="form-control" id="offerFrom" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="offerTo" class="form-label">To *</label>
+                                <input type="text" class="form-control" id="offerTo" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="offerDate" class="form-label">Departure Date *</label>
+                                <input type="date" class="form-control" id="offerDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="offerTime" class="form-label">Departure Time *</label>
+                                <input type="time" class="form-control" id="offerTime" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="offerSeats" class="form-label">Available Seats *</label>
+                                <select class="form-control" id="offerSeats" required>
+                                    <option value="">Select seats</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="offerPrice" class="form-label">Price per Seat ($) *</label>
+                                <input type="number" class="form-control" id="offerPrice" min="0" step="0.01" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="offerDescription" class="form-label">Description (Optional)</label>
+                                <textarea class="form-control" id="offerDescription" rows="3" placeholder="Additional information about the ride..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-plus me-2"></i>Create Ride
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Rides Tab -->
+            <div class="tab-pane fade" id="my-rides" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-car me-2"></i>My Offered Rides</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="myRidesContainer">
+                            <div class="text-center">
+                                <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                                <p class="mt-2 text-muted">Loading your rides...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Bookings Tab -->
+            <div class="tab-pane fade" id="bookings" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-ticket-alt me-2"></i>My Bookings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="bookingsContainer">
+                            <div class="text-center">
+                                <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                                <p class="mt-2 text-muted">Loading your bookings...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div class="tab-pane fade" id="profile" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user-circle me-2"></i>My Profile</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="profileAlert" class="alert d-none"></div>
+                        <form id="profileForm" class="row g-3">
+                            <div class="col-md-6">
+                                <label for="profileName" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="profileName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profileEmail" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="profileEmail" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profilePhone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="profilePhone">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Account Role</label>
+                                <input type="text" class="form-control" id="profileRole" readonly>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-2"></i>Update Profile
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
