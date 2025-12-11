@@ -106,83 +106,103 @@ async function loadAllUsers() {
     }
 }
 
-// Load all rides
 async function loadAllRides() {
     const container = document.getElementById('ridesContainer');
     const totalRidesElement = document.getElementById('totalRides');
     
     try {
-        container.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i><p class="mt-2 text-muted">Loading rides...</p></div>';
+        container.innerHTML = `
+            <div class="text-center">
+                <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                <p class="mt-2 text-muted">Loading rides...</p>
+            </div>
+        `;
         
-        const rides = await apiRequest('/rides');
+        const rides = await apiRequest('/rides'); // Authenticated request
         
-        // Update total count
+        // Update total rides count
         totalRidesElement.textContent = `${rides.length} Ride${rides.length !== 1 ? 's' : ''}`;
         
+        // Handle empty list
         if (rides.length === 0) {
             container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-car"></i>
-                    <h4>No rides found</h4>
+                <div class="empty-state text-center text-muted">
+                    <i class="fas fa-car fa-2x mb-2"></i>
+                    <h5>No rides found</h5>
                 </div>
             `;
             return;
         }
         
-        // Create rides cards
+        // Build ride cards
         const ridesHtml = rides.map(ride => `
-            <div class="card ride-card mb-3">
+            <div class="card ride-card mb-3 shadow-sm">
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row align-items-start">
                         <div class="col-md-9">
                             <h6 class="card-title">
                                 <i class="fas fa-map-marker-alt text-success me-1"></i>
-                                ${ride.from} → ${ride.to}
+                                ${ride.from || 'Unknown'} → ${ride.to || 'Unknown'}
                             </h6>
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <p class="card-text mb-1">
                                         <small class="text-muted">
                                             <i class="fas fa-calendar me-1"></i>
-                                            ${new Date(ride.departureDate).toLocaleDateString()} at ${ride.departureTime}
+                                            ${ride.departureDate ? new Date(ride.departureDate).toLocaleDateString() : 'N/A'} at ${ride.departureTime || 'N/A'}
                                         </small>
                                     </p>
                                     <p class="card-text mb-1">
-                                        <i class="fas fa-user me-1"></i> Driver: ${ride.driver.name}
+                                        <i class="fas fa-user me-1"></i>
+                                        Driver: ${ride.driver?.name || 'Unknown'}
                                     </p>
                                     <p class="card-text mb-1">
-                                        <i class="fas fa-envelope me-1"></i> ${ride.driver.email}
+                                        <i class="fas fa-envelope me-1"></i>
+                                        ${ride.driver?.email || 'N/A'}
                                     </p>
                                 </div>
+
                                 <div class="col-md-6">
                                     <p class="card-text mb-1">
-                                        <i class="fas fa-users me-1"></i> 
-                                        Available: ${ride.availableSeats} | Booked: ${ride.passengers.length}
+                                        <i class="fas fa-users me-1"></i>
+                                        Available: ${ride.availableSeats ?? 0} | Booked: ${ride.passengers?.length ?? 0}
                                     </p>
                                     <p class="card-text mb-1">
-                                        <i class="fas fa-dollar-sign me-1"></i> $${ride.pricePerSeat} per seat
+                                        <i class="fa-solid fa-indian-rupee-sign me-1"></i>
+                                        ₹${ride.pricePerSeat ?? 'N/A'} per seat
                                     </p>
                                     <p class="card-text mb-1">
-                                        <span class="badge bg-${ride.status === 'active' ? 'success' : 'secondary'}">${ride.status}</span>
+                                        <span class="badge bg-${ride.status === 'active' ? 'success' : 'secondary'}">
+                                            ${ride.status || 'unknown'}
+                                        </span>
                                     </p>
                                 </div>
                             </div>
+
                             ${ride.description ? `<p class="card-text mt-2"><small class="text-muted">${ride.description}</small></p>` : ''}
-                            ${ride.passengers.length > 0 ? `
-                                <div class="mt-2">
-                                    <h6>Passengers:</h6>
-                                    <div>
-                                        ${ride.passengers.map(p => `
-                                            <span class="badge bg-light text-dark me-2">
-                                                ${p.user.name} (${p.bookedSeats} seat${p.bookedSeats > 1 ? 's' : ''})
-                                            </span>
-                                        `).join('')}
-                                    </div>
+
+                            ${ride.passengers?.length > 0 ? `
+                            <div class="mt-2">
+                                <h6>Passengers:</h6>
+                                <div>
+                                    ${ride.passengers.map(p => `
+                                        <span class="badge 
+                                            ${p.status === 'accepted' ? 'bg-success' : 
+                                                p.status === 'pending' ? 'bg-warning text-dark' : 'bg-danger'} me-2">
+                                            ${p.user?.name || 'Unknown'} 
+                                            (${p.bookedSeats} seat${p.bookedSeats > 1 ? 's' : ''}) 
+                                            - ${p.status}
+                                        </span>
+                                    `).join('')}
                                 </div>
+                            </div>
                             ` : ''}
                         </div>
+
                         <div class="col-md-3 text-end">
-                            <button class="btn btn-danger btn-sm" onclick="showDeleteModal('ride', '${ride._id}', '${ride.from} → ${ride.to}')">
+                            <button class="btn btn-danger btn-sm" 
+                                onclick="showDeleteModal('ride', '${ride._id}', '${ride.from || 'Unknown'} → ${ride.to || 'Unknown'}')">
                                 <i class="fas fa-trash me-1"></i> Delete
                             </button>
                         </div>
@@ -190,13 +210,15 @@ async function loadAllRides() {
                 </div>
             </div>
         `).join('');
-        
+
         container.innerHTML = ridesHtml;
+
     } catch (error) {
+        console.error("Error loading rides:", error);
         container.innerHTML = `
             <div class="alert alert-danger">
                 <i class="fas fa-exclamation-triangle me-1"></i>
-                Error loading rides: ${error.message}
+                Error loading rides: ${error.message || 'Unknown error'}
             </div>
         `;
     }

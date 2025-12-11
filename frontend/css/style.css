@@ -3,7 +3,7 @@
     --secondary-color: #6c757d;
     --success-color: #198754;
     --danger-color: #dc3545;
-    --warning-color: #ffc107;
+    --warning-color: #198754;
     --info-color: #0dcaf0;
     --light-color: #f8f9fa;
     --dark-color: #212529;
@@ -286,4 +286,77 @@ footer {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     border: 1px solid #dee2e6;
     background: white;
+}
+#notificationPanel .notification-item.unread {
+    font-weight: bold;
+    background-color: rgba(25, 135, 84, 0.1);
+}     
+
+input.editable {
+  background-color: #fff8e1 !important; /* soft yellow */
+  border-color: #ffc107 !important;
+}
+
+body {
+  background-color: #f8f9fa;
+}
+
+.navbar-brand {
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
+}
+
+.ride-card {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #adb5bd;
+}
+
+.alert {
+  border-radius: 8px;
+}
+
+input.editable {
+  background-color: #fff9e6;
+  border: 1px solid #ffc107;
+}
+
+.rating-stars i {
+  transition: 0.3s;
+}
+
+.rating-stars i:hover {
+  transform: scale(1.2);
+}
+
+#notificationPanel {
+  background-color: #fff;
+  border-radius: 8px;
+}
+#notificationPanel .notification-item.unread {
+  background-color: #e9f7ef;
+}
+#vehicleImageModal img {
+  transition: transform 0.3s ease-in-out;
+}
+
+#vehicleImageModal img:hover {
+  transform: scale(1.05);
+}
+#searchResults {
+  transition: opacity 0.3s ease;
+}
+#searchResults.loading {
+  opacity: 0.6;
 }

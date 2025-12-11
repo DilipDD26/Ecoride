@@ -1,6 +1,6 @@
 // Authentication utilities
 const API_BASE_URL = window.location.origin.includes('localhost') 
-    ? 'http://localhost:5000/api' 
+    ? 'http://localhost:5008/api' 
     : `${window.location.origin}/api`;
 
 // Check if user is authenticated
@@ -31,7 +31,7 @@ function clearAuthData() {
     localStorage.removeItem('userData');
 }
 
-// API request helper with authentication
+// API request helper
 async function apiRequest(endpoint, options = {}) {
     const token = getToken();
     const config = {
@@ -54,24 +54,23 @@ async function apiRequest(endpoint, options = {}) {
         return data;
     } catch (error) {
         console.error('API Request Error:', error);
-        
-        // If unauthorized, clear auth data and redirect to login
+
         if (error.message.includes('Token') || error.message.includes('Authorization')) {
             clearAuthData();
             window.location.href = '/login';
         }
-        
+
         throw error;
     }
 }
 
-// Logout function
+// Logout
 function logout() {
     clearAuthData();
-    window.location.href = '/login';
+    window.location.href = '/';
 }
 
-// Redirect based on user role
+// Redirect user
 function redirectToDashboard(user) {
     if (user.role === 'admin') {
         window.location.href = '/dashboard-admin';
@@ -100,14 +99,13 @@ function checkAuth() {
 if (document.getElementById('loginForm')) {
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const loginBtn = document.getElementById('loginBtn');
         const loginSpinner = document.getElementById('loginSpinner');
         const loginAlert = document.getElementById('loginAlert');
 
-        // Show loading state
         loginBtn.disabled = true;
         loginSpinner.classList.remove('d-none');
         loginAlert.classList.add('d-none');
@@ -115,22 +113,22 @@ if (document.getElementById('loginForm')) {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
 
             const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
 
-            if (!response.ok) {
-                throw new Error(data.message);
+            // ✅ If email not verified
+            if (data.requireVerification) {
+                loginAlert.textContent = "Please verify your email before logging in. Check your inbox!";
+                loginAlert.classList.remove('d-none');
+                return;
             }
 
-            // Save auth data
+            // Save auth data and redirect
             setAuthData(data.token, data.user);
-            
-            // Redirect to appropriate dashboard
             redirectToDashboard(data.user);
 
         } catch (error) {
@@ -147,7 +145,7 @@ if (document.getElementById('loginForm')) {
 if (document.getElementById('signupForm')) {
     document.getElementById('signupForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const name = document.getElementById('name').value;
         const email = document.getElementById('email').value;
         const phone = document.getElementById('phone').value;
@@ -157,14 +155,12 @@ if (document.getElementById('signupForm')) {
         const signupSpinner = document.getElementById('signupSpinner');
         const signupAlert = document.getElementById('signupAlert');
 
-        // Validate passwords match
         if (password !== confirmPassword) {
             signupAlert.textContent = 'Passwords do not match';
             signupAlert.classList.remove('d-none');
             return;
         }
 
-        // Show loading state
         signupBtn.disabled = true;
         signupSpinner.classList.remove('d-none');
         signupAlert.classList.add('d-none');
@@ -172,27 +168,22 @@ if (document.getElementById('signupForm')) {
         try {
             const response = await fetch(`${API_BASE_URL}/auth/signup`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, phone, password })
             });
 
             const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
 
-            if (!response.ok) {
-                throw new Error(data.message);
-            }
-
-            // Save auth data
-            setAuthData(data.token, data.user);
-            
-            // Redirect to user dashboard (new users are always 'user' role)
-            window.location.href = '/dashboard-user';
+            // ✅ Instead of logging in automatically:
+            signupAlert.textContent = "Signup successful! Please check your email to verify your account.";
+            signupAlert.classList.remove('d-none');
+            signupAlert.classList.add('alert-success');
 
         } catch (error) {
             signupAlert.textContent = error.message;
             signupAlert.classList.remove('d-none');
+            signupAlert.classList.add('alert-danger');
         } finally {
             signupBtn.disabled = false;
             signupSpinner.classList.add('d-none');
@@ -200,15 +191,12 @@ if (document.getElementById('signupForm')) {
     });
 }
 
-// Check authentication when page loads
+// Check auth on load
 document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname;
-    
-    // Pages that require authentication
+
     if (currentPage.includes('dashboard')) {
         checkAuth();
-        
-        // Check role-based access
         const user = getUserData();
         if (user) {
             if (currentPage.includes('admin') && user.role !== 'admin') {
@@ -218,12 +206,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
-    // Redirect if already logged in
+
     if ((currentPage === '/login' || currentPage === '/signup') && isAuthenticated()) {
         const user = getUserData();
-        if (user) {
-            redirectToDashboard(user);
-        }
+        if (user) redirectToDashboard(user);
     }
 });
