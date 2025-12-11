@@ -182,7 +182,7 @@ GET /api/notifications
 
 ## 👥 Developers
 👨‍💻 **Dilip Das M Nayaka**  
-👨‍💻 **Akshobya**
+👨‍💻 **Akshobya A S**
 
 ---
 
